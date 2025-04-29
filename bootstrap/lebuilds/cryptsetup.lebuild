@@ -31,6 +31,3 @@ deploy="/binit/prefix/sbin/cryptsetup.static"
 fetch_source
 install_source
 build_source
-
-    #sed -i 's/tests\/Makefile tests\/fuzz\/Makefile//' configure && \
-    #sed -i 's/#! \/bin\/sh/#! \/bin\/bash/' configure && \
