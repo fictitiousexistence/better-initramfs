@@ -1,18 +1,19 @@
 #!/bin/sh
 name='libaio'
-version='0.3.112'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/libaio-${version}.tar.gz" )
+version='0.3.113'
+sources=( "https://pagure.io/${name}/archive/${name}-${version}/${name}-${name}-${version}.tar.gz" )
 homepage='https://pagure.io/libaio'
 license='LGPLv2'
 
 build_cmd="
     cd /source/${name}-${version} && \
-    ENABLE_SHARED=0 make \
+    make \
         prefix=/binit/prefix \
         sysconfdir=/binit/prefix/etc \
         mandir=/binit/prefix/share/main \
         infodir=/binit/prefix/share/info \
-        -j ${cores_num:-1} install
+        -j ${cores_num:-1} install 
+        
 "
 
 deploy="/binit/prefix/sbin/lvm"
@@ -20,4 +21,3 @@ deploy="/binit/prefix/sbin/lvm"
 fetch_source
 install_source
 build_source
-

@@ -1,18 +1,18 @@
 #!/bin/sh
 name='libuuid'
-version='2.37'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/util-linux-${version}.tar.xz" )
+version='2.41'
+sources=( "https://www.kernel.org/pub/linux/utils/util-linux/v${version}/util-linux-${version}.tar.xz" )
 homepage='http://www.kernel.org/pub/linux/utils/util-linux/'
 license='BSD'
 
 build_cmd="
 	cd /source/${name}-${version} && \
 	./configure --prefix=/binit/prefix \
-    --disable-shared \
 	--disable-libtool-lock \
 	--disable-libblkid \
 	--disable-libmount \
 	--disable-libsmartcols \
+	--disable-liblastlog2 \
 	--disable-libfdisk && \
 	make -j ${cores_num:-1} libuuid.la && \
 	make install-usrlib_execLTLIBRARIES install-uuidincHEADERS

@@ -1,7 +1,7 @@
 #!/bin/sh
 name='busybox'
-version='1.36.0'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/${name}-${version}.tar.bz2" )
+version='1.37.0'
+sources=( "https://busybox.net/downloads/${name}-${version}.tar.bz2" )
 homepage='http://busybox.net/'
 license='GPLv2'
 
@@ -18,4 +18,3 @@ deploy="/binit/prefix/bin/busybox"
 fetch_source
 install_source
 build_source
-

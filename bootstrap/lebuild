@@ -80,7 +80,7 @@ install_source() {
                         rm -rf "${build_dir}/source/${name}-${version}"
                     fi
                     mkdir -p "${build_dir}/source/${name}-${version}"
-                    run tar xf  "${distfiles}/${source##*/}" --strip-components 1 -C "${build_dir}/source/${name}-${version}"
+                    run tar xf "${distfiles}/${source##*/}" --strip-components 1 -C "${build_dir}/source/${name}-${version}"
                 ;;
                 *)
                     mkdir -p "${build_dir}/source/${name}-${version}"
@@ -90,7 +90,8 @@ install_source() {
             if [ -d "${workdir}/patches/${name}" ]; then
                 for patch in "${workdir}/patches/${name}"/*; do
                     einfo "Applying ${patch##*/} ..."
-                    run patch -d "${build_dir}/source/${name}-${version}/" -p1 -i "${patch}" --silent
+                    #run patch -d "${build_dir}/source/${name}-${version}/" -p1 -i "${patch}" --silent
+                    run patch -d "${build_dir}/source/${name}-${version}/" -p1 -i "${patch}"
                 done
             fi
         fi
@@ -98,22 +99,20 @@ install_source() {
 }
 
 build_source() {
-    LDFLAGS="-L/binit/prefix/lib"
-    if [ "${STATIC}" = '1' ]; then
-        LDFLAGS="${LDFLAGS} -static"
-    fi
-
+	[[ -d ${build_dir}/proc ]] || mkdir -p ${build_dir}/proc
+	mount -t proc none ${build_dir}/proc
     if env -i \
         PATH="/binit/prefix/bin:/binit/prefix/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
         HOME="/root" \
         TERM="${TERM}" \
-        CFLAGS="-Os -pipe -fomit-frame-pointer" \
-        CXXFLAGS="-Os -pipe -fomit-frame-pointer" \
+        CFLAGS="-Os -pipe -fomit-frame-pointer -static" \
+        CXXFLAGS="-Os -pipe -fomit-frame-pointer -static" \
+        LDFLAGS='-static -L/binit/prefix/lib' \
         CPPFLAGS='-I/binit/prefix/include' \
-        LDFLAGS="${LDFLAGS}" \
-        PKG_CONFIG_PATH='/binit/prefix/lib/pkgconfig/' \
-        bwrap --bind "${build_dir}" / --dev /dev --proc /proc /bin/sh -c "umask 022 && ${build_cmd:-false}"
+        PKG_CONFIG_PATH='/binit/prefix/lib/pkgconfig/:/binit/prefix/lib64/pkgconfig/' \
+        chroot "${build_dir}" /bin/sh -c "umask 022 && ${build_cmd:-false}"
     then
+	umount -R ${build_dir}/proc
         einfo "Finished: $name-$version"
     else
         die "Failed: $name-$version"
@@ -124,6 +123,8 @@ print_help() {
 cat << EOF
 ${0##*/} v0.1.1 - Simple build system using Alpine Linux sysroot.
     
+    You should run it as root (as we use chroot).
+
 Usage:
     $0 init <arch> - prepare build_root with specified arch. x86 and x86_64 is supported.
     $0 build <name> - build <name> package.
@@ -148,7 +149,7 @@ case "$1" in
             ;;
         esac
         einfo "Preparing '${build_dir}' ..."
-        sysroot_url="https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/alpine-3.17.2-${arch}-sysroot.tar.xz"
+        sysroot_url="https://codeberg.org/fictitiousexistence/better-initramfs-dist-files/raw/branch/main/alpine-3.12.12-${arch}-sysroot.tar.xz"
         rootfs_tarball="${distfiles}/${sysroot_url##*/}"
         fetch_source "${sysroot_url}"
         if [ -d "${build_dir}" ]; then
@@ -157,10 +158,16 @@ case "$1" in
         fi
         mkdir "${build_dir}"
         einfo "Unpacking '${rootfs_tarball##*/}' ..."
-        tar xf "${rootfs_tarball}" --exclude 'dev/*' -C "${build_dir}/" --strip-components 1
+        tar xf "${rootfs_tarball}" -C "${build_dir}/" --strip-components 1
         cat /etc/resolv.conf > "${build_dir}/etc/resolv.conf"
         echo "${arch}" > "${build_dir}/arch"
-        rmdir "${build_dir}/proc"
+	umount -R ${build_dir}/proc
+	rmdir "${build_dir}/proc"
+	#mknod "${build_dir}/dev/console" c 5 1
+	mknod -m 666 "${build_dir}/"dev/null c 1 3
+        mknod -m 666 "${build_dir}/"dev/urandom c 1 9
+        mknod -m 666 "${build_dir}/"dev/random c 1 8
+        mknod -m 666 "${build_dir}/"dev/zero c 1 5
     ;;
     build)
         shift
@@ -178,7 +185,7 @@ case "$1" in
                     . "${workdir}/lebuilds/$1.lebuild"
                     if [ -n "${deploy}" ] && [ -f "${build_dir}/${deploy}" ]; then
                         if ! [ -d "${workdir}/output" ]; then mkdir "${workdir}/output"; fi
-                        install --mode=0755  "${build_dir}/${deploy}" "${workdir}/output/"
+                        cp "${build_dir}/${deploy}" "${workdir}/output/"
                         strip -s "${workdir}/output/${deploy##*/}"
                     fi
                 ) || die "Build failed: '$1'."

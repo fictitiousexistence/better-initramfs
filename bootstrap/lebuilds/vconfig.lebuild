@@ -1,7 +1,7 @@
 #!/bin/sh
 name='vconfig'
 version='1.9'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/vlan.${version}.tar.gz" )
+sources=( "https://codeberg.org/fictitiousexistence/better-initramfs-dist-files/raw/branch/main/vlan.${version}.tar.gz" )
 homepage='http://www.candelatech.com/~greear/vlan.html'
 license='GPL-2'
 
@@ -13,8 +13,6 @@ build_cmd="
 "
 
 deploy="/binit/prefix/sbin/vconfig"
-
-STATIC=1
 
 fetch_source
 install_source

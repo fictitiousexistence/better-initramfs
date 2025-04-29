@@ -1,8 +1,9 @@
 #!/bin/sh
 name='lvm2'
-version='2.02.188'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/LVM2.${version}.tgz" )
-homepage='http://sources.redhat.com/lvm2/'
+version='2.03.22'
+sources=( "https://sourceware.org/ftp/lvm2/.${PV}.tgz" )
+sources=( "https://sourceware.org/ftp/${name}/releases/LVM2.${version}.tgz" )
+homepage='https://sourceware.org/lvm2/'
 license='GPLv2'
 
 # The reason why CPPFLAGS is appended to CFLAGS is that lvm2 build system
@@ -11,18 +12,13 @@ license='GPLv2'
 build_cmd="
     export CFLAGS=\"\$CFLAGS \$CPPFLAGS\" && \
     cd /source/${name}-${version} && \
-    ln -snfv ioctl/libdevmapper.a libdm/libdevmapper.a && \
-    ./configure \
-        --prefix=/binit/prefix \
-        --enable-static_link \
-        --with-thin=internal && \
+    ./configure --prefix=/binit/prefix --enable-static_link --disable-nls --without-systemd-run --disable-systemd-journal --disable-selinux --disable-dependency-tracking --disable-silent-rules --enable-dmfilemapd --disable-dmeventd --enable-fsadm --disable-readline --disable-lvmlockd-sanlock --disable-notify-dbus --disable-app-machineid --disable-valgrind-pool && \
     make -j ${cores_num:-1} all device-mapper && \
     make install
 "
 
-deploy="/binit/prefix/sbin/lvm.static"
+deploy="/binit/prefix/sbin/lvm"
 
 fetch_source
 install_source
 build_source
-

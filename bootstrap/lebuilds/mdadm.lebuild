@@ -1,18 +1,17 @@
 #!/bin/sh
 name='mdadm'
-version='4.1'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/${name}-${version}.tar.xz" )
+version='4.4'
+sources=( "https://git.kernel.org/pub/scm/utils/${name}/${name}.git/snapshot/${name}-${version}.tar.gz" )
 homepage='http://neil.brown.name/blog/mdadm'
 license='GPLv2'
+
 build_cmd="
-	cd /source/${name}-${version} && \
+    cd /source/${name}-${version} && \
     make MAP_DIR='/dev/.mdadm'
-    make DESTDIR=/binit/prefix install
+    make CXFLAGS=-DNO_LIBUDEV DESTDIR=/binit/prefix install
 "
 
 deploy="/binit/prefix/sbin/mdadm"
-
-STATIC=1
 
 fetch_source
 install_source

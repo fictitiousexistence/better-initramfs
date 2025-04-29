@@ -1,14 +1,13 @@
 #!/bin/sh
 name='popt'
-version='1.18'
-sources=( "https://bitbucket.org/piotrkarbowski/better-initramfs/downloads/${name}-${version}.tar.gz" )
+version='1.19'
+sources=( "http://ftp.rpm.org/${name}/releases/${name}-1.x/${name}-${version}.tar.gz" )
 homepage='http://rpm5.org/'
 license='MIT'
 
 build_cmd="
     cd /source/${name}-${version} && \
     ./configure --prefix=/binit/prefix \
-    --disable-shared \
     --disable-nls && \
     make -j ${cores_num:-1} && \
     make install

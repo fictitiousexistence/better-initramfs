@@ -1,6 +1,8 @@
 ================
 better-initramfs
 ================
+Forked from https://github.com/fff7d1bc/better-initramfs.
+I only updated some of the packages to newer versions.
 
 .. contents:: Table of Contents
 
